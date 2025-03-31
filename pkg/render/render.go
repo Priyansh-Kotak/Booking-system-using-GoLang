@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"path/filepath"
 	"text/template"
+
+	"github.com/Priyansh-Kotak/udemy-course-project/pkg/config"
 )
 
 // func RenderTempleteTest(w http.ResponseWriter, temp string) {
@@ -23,13 +25,17 @@ import (
 // }
 
 // var tc = map[string]*template.Template
+var app *config.AppConfig
+// NewTemplates sets the config for the template package
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
 
 func RenderTemplets(w http.ResponseWriter, t string) {
 	//create a new templete cache
-	tc, err := createTemplateCache()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// tc, err := CreateTemplateCache()
+	tc := app.TemplateCache
+	
 
 	tmpl, errs := tc[t]
 	if !errs {
@@ -38,7 +44,7 @@ func RenderTemplets(w http.ResponseWriter, t string) {
 
 	buf := new(bytes.Buffer)
 
-	err = tmpl.Execute(buf, nil)
+	err := tmpl.Execute(buf, nil)
 	if err != nil {
 		log.Println(err)
 	}
@@ -72,7 +78,7 @@ func RenderTemplets(w http.ResponseWriter, t string) {
 // 	return nil
 // }
 
-func createTemplateCache() (map[string]*template.Template, error) {
+func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
 
 	// get all the pages from the directory which has filename start from ./templets/*.page.html
