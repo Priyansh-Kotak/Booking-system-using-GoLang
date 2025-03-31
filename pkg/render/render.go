@@ -1,70 +1,110 @@
 package render
 
 import (
-	"fmt"
+	"bytes"
 	"log"
 	"net/http"
+	"path/filepath"
 	"text/template"
 )
 
-func RenderTempleteTest(w http.ResponseWriter, temp string) {
-	parsedTemplete, err := template.ParseFiles("./templets/"+temp, "./templets/base.layout.html")
-	if err != nil {
-		log.Println("error while parsing templete")
-		return
-	}
+// func RenderTempleteTest(w http.ResponseWriter, temp string) {
+// 	parsedTemplete, err := template.ParseFiles("./templets/"+temp, "./templets/base.layout.html")
+// 	if err != nil {
+// 		log.Println("error while parsing templete")
+// 		return
+// 	}
 
-	errs := parsedTemplete.Execute(w, nil)
-	if errs != nil {
-		log.Println("error while executing the parsed filr")
-		return
-	}
-}
+// 	errs := parsedTemplete.Execute(w, nil)
+// 	if errs != nil {
+// 		log.Println("error while executing the parsed filr")
+// 		return
+// 	}
+// }
 
-var tc = make(map[string]*template.Template)
+// var tc = map[string]*template.Template
 
 func RenderTemplets(w http.ResponseWriter, t string) {
-	var tmpl *template.Template
-	var err error
-
-	_, isMap := tc[t]
-
-	if !isMap {
-		// we will create a new templete
-		err = createTemplateCache(t)
-		if err != nil {
-			log.Println(err)
-		}
-	} else {
-		// we will take it from the cache
-		log.Println("taking from the cache")
+	//create a new templete cache
+	tc, err := createTemplateCache()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	tmpl = tc[t]
+	tmpl, errs := tc[t]
+	if !errs {
+		log.Fatal(errs)
+	}
 
-	err = tmpl.Execute(w, nil)
+	buf := new(bytes.Buffer)
+
+	err = tmpl.Execute(buf, nil)
 	if err != nil {
 		log.Println(err)
 	}
+
+	//render the template
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		log.Println(err)
+	}
+
 }
 
 // Approach 1 for caching the records of parseFiles
-func createTemplateCache(t string) error {
-	templates := []string{
-		fmt.Sprintf("./templets/%s", t),
-		"./templets/base.layout.html",
-	}
+// func createTemplateCache(t string) error {
+// 	templates := []string{
+// 		fmt.Sprintf("./templets/%s", t),
+// 		"./templets/base.layout.html",
+// 	}
 
-	log.Println("printing templates ", templates)
+// 	log.Println("printing templates ", templates)
 
-	tmpl, err := template.ParseFiles(templates...)
+// 	tmpl, err := template.ParseFiles(templates...)
 
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	tc[t] = tmpl
+// 	log.Println("loging tmpl ", tmpl.ParseName)
+// 	log.Println("pringitng ", tc)
+// 	return nil
+// }
+
+func createTemplateCache() (map[string]*template.Template, error) {
+	myCache := map[string]*template.Template{}
+
+	// get all the pages from the directory which has filename start from ./templets/*.page.html
+	pages, err := filepath.Glob("./templets/*.page.html")
 	if err != nil {
-		return err
+		return myCache, err
 	}
 
-	tc[t] = tmpl
-	log.Println("loging tmpl ", tmpl.ParseName)
-	log.Println("pringitng ", tc)
-	return nil
+	// now loop through each file and parse them
+	for _, page := range pages {
+		name := filepath.Base(page)
+		log.Println("printing name ", name, "page = ", page)
+
+		ts, err := template.New(name).ParseFiles(page)
+		log.Println("Printing ts ", ts)
+		if err != nil {
+			return myCache, err
+		}
+
+		matches, err := filepath.Glob("./templets/*.layout.html")
+		log.Println("printing matches ", matches)
+		if err != nil {
+			return myCache, err
+		}
+		if len(matches) > 0 {
+			ts, err = ts.ParseGlob("./templets/*.layout.html")
+			if err != nil {
+				return myCache, err
+			}
+		}
+
+		myCache[name] = ts
+	}
+	return myCache, nil
 }
