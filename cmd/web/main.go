@@ -18,10 +18,17 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to load the cache ")
 	}
+
+	app.UseCache = false
 	app.TemplateCache = tc
+
+	repo := handlers.NewRepo(&app)
+
+	handlers.NewHandlers(repo)
+
 	render.NewTemplates(&app)
-	http.HandleFunc("/", handlers.Home)
-	http.HandleFunc("/about", handlers.About)
+	http.HandleFunc("/", handlers.Repo.Home)
+	http.HandleFunc("/about", handlers.Repo.About)
 
 	fmt.Println("Starting port at ", portNumber)
 	_ = http.ListenAndServe(portNumber, nil)
