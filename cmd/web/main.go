@@ -2,14 +2,24 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/Priyansh-Kotak/udemy-course-project/pkg/config"
 	"github.com/Priyansh-Kotak/udemy-course-project/pkg/handlers"
+	"github.com/Priyansh-Kotak/udemy-course-project/pkg/render"
 )
 
 const portNumber = ":8000"
 
 func main() {
+	var app config.AppConfig
+	tc, err := render.CreateTemplateCache()
+	if err != nil {
+		log.Fatal("failed to load the cache ")
+	}
+	app.TemplateCache = tc
+	render.NewTemplates(&app)
 	http.HandleFunc("/", handlers.Home)
 	http.HandleFunc("/about", handlers.About)
 
