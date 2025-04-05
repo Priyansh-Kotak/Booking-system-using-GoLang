@@ -1,28 +1,55 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Priyansh-Kotak/udemy-course-project/pkg/config"
 	"github.com/Priyansh-Kotak/udemy-course-project/pkg/handlers"
 	"github.com/Priyansh-Kotak/udemy-course-project/pkg/render"
+	"github.com/alexedwards/scs/v2"
 )
 
 const portNumber = ":8000"
 
+var app config.AppConfig
+var session *scs.SessionManager
+
 func main() {
-	var app config.AppConfig
+
+	app.InProduction = false
+
+	session = scs.New()
+	session.Lifetime = 24 * time.Hour
+	session.Cookie.Persist = true
+	session.Cookie.Secure = app.InProduction
+	session.Cookie.SameSite = http.SameSiteLaxMode
+
+	app.Session = session
+
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
 		log.Fatal("failed to load the cache ")
 	}
-	app.TemplateCache = tc
-	render.NewTemplates(&app)
-	http.HandleFunc("/", handlers.Home)
-	http.HandleFunc("/about", handlers.About)
 
-	fmt.Println("Starting port at ", portNumber)
-	_ = http.ListenAndServe(portNumber, nil)
+	app.UseCache = false
+	app.TemplateCache = tc
+
+	repo := handlers.NewRepo(&app)
+
+	handlers.NewHandlers(repo)
+
+	render.NewTemplates(&app)
+	// http.HandleFunc("/", handlers.Repo.Home)
+	// http.HandleFunc("/about", handlers.Repo.About)
+
+	srv := &http.Server{
+		Addr:    portNumber,
+		Handler: routes(&app),
+	}
+
+	errs := srv.ListenAndServe()
+	log.Fatal(errs)
+
 }

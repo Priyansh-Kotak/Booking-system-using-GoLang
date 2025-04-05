@@ -2,4 +2,14 @@
 
 {{define "content"}}
     <h1>I am inside the About Page</h1>
+    <p>Hello guys, welcome to brogrammers</p>
+    <p>This came from the template : {{index .StringMap "test"}}</p>
+    <p>Printing ip : {{index .StringMap "remote_ip"}}</p>
+    <p>
+        {{if ne (index .StringMap "remote_ip") ""}}
+            Your remote IP address is {{index .StringMap "remote_ip"}}
+        {{else}}
+            I don't know your ip address yet. Visit the <a href="/">Home page</a> so that I can set it.
+        {{end}}
+    </p>
 {{end}}

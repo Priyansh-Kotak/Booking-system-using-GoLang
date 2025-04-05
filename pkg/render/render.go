@@ -8,34 +8,31 @@ import (
 	"text/template"
 
 	"github.com/Priyansh-Kotak/udemy-course-project/pkg/config"
+	"github.com/Priyansh-Kotak/udemy-course-project/pkg/models"
 )
 
-// func RenderTempleteTest(w http.ResponseWriter, temp string) {
-// 	parsedTemplete, err := template.ParseFiles("./templets/"+temp, "./templets/base.layout.html")
-// 	if err != nil {
-// 		log.Println("error while parsing templete")
-// 		return
-// 	}
-
-// 	errs := parsedTemplete.Execute(w, nil)
-// 	if errs != nil {
-// 		log.Println("error while executing the parsed filr")
-// 		return
-// 	}
-// }
-
-// var tc = map[string]*template.Template
 var app *config.AppConfig
+
 // NewTemplates sets the config for the template package
 func NewTemplates(a *config.AppConfig) {
 	app = a
 }
 
-func RenderTemplets(w http.ResponseWriter, t string) {
-	//create a new templete cache
-	// tc, err := CreateTemplateCache()
-	tc := app.TemplateCache
-	
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
+func RenderTemplets(w http.ResponseWriter, t string, td *models.TemplateData) {
+
+	var tc map[string]*template.Template
+	// render ever time the page refreshes
+	if app.UseCache {
+		// get the template cache from the app config
+		tc = app.TemplateCache
+
+	} else {
+		tc, _ = CreateTemplateCache()
+	}
 
 	tmpl, errs := tc[t]
 	if !errs {
@@ -44,7 +41,9 @@ func RenderTemplets(w http.ResponseWriter, t string) {
 
 	buf := new(bytes.Buffer)
 
-	err := tmpl.Execute(buf, nil)
+	td = AddDefaultData(td)
+
+	err := tmpl.Execute(buf, td)
 	if err != nil {
 		log.Println(err)
 	}
@@ -56,27 +55,6 @@ func RenderTemplets(w http.ResponseWriter, t string) {
 	}
 
 }
-
-// Approach 1 for caching the records of parseFiles
-// func createTemplateCache(t string) error {
-// 	templates := []string{
-// 		fmt.Sprintf("./templets/%s", t),
-// 		"./templets/base.layout.html",
-// 	}
-
-// 	log.Println("printing templates ", templates)
-
-// 	tmpl, err := template.ParseFiles(templates...)
-
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	tc[t] = tmpl
-// 	log.Println("loging tmpl ", tmpl.ParseName)
-// 	log.Println("pringitng ", tc)
-// 	return nil
-// }
 
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
@@ -95,6 +73,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		ts, err := template.New(name).ParseFiles(page)
 		log.Println("Printing ts ", ts)
 		if err != nil {
+			log.Println("for loop  ", err)
 			return myCache, err
 		}
 
