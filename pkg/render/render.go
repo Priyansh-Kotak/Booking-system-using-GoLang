@@ -73,6 +73,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		ts, err := template.New(name).ParseFiles(page)
 		log.Println("Printing ts ", ts)
 		if err != nil {
+			log.Println("for loop  ", err)
 			return myCache, err
 		}
 

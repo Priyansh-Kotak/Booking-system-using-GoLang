@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/Priyansh-Kotak/udemy-course-project/pkg/config"
@@ -30,6 +31,10 @@ func NewHandlers(r *Repository) {
 
 // Home is the home page render
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
+	remoteIP := r.RemoteAddr
+	m.App.Session.Put(r.Context(), "remote_ip", remoteIP)
+
+	log.Println("local ip address", remoteIP)
 
 	stringMap := make(map[string]string)
 	stringMap["testing"] = "Hello , developers"
@@ -41,5 +46,15 @@ func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
 
 // About is the about page render
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplets(w, "about.page.html", &models.TemplateData{})
+	StringMap := make(map[string]string)
+
+	StringMap["test"] = "hey -- Priyansh this side"
+
+	remoteIP := m.App.Session.GetString(r.Context(), "remote_ip")
+	StringMap["remote_ip"] = remoteIP
+	log.Println("Printing about ip ", remoteIP)
+
+	render.RenderTemplets(w, "about.page.html", &models.TemplateData{
+		StringMap: StringMap,
+	})
 }
