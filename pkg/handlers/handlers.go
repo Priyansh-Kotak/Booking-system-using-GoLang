@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/config"
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/models"
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/render"
+	"github.com/Priyansh-Kotak/booking-system/pkg/config"
+	"github.com/Priyansh-Kotak/booking-system/pkg/models"
+	"github.com/Priyansh-Kotak/booking-system/pkg/render"
 )
 
 // Repo the repository used by the handlers

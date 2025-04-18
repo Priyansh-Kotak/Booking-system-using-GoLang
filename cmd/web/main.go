@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/config"
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/handlers"
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/render"
+	"github.com/Priyansh-Kotak/booking-system/pkg/config"
+	"github.com/Priyansh-Kotak/booking-system/pkg/handlers"
+	"github.com/Priyansh-Kotak/booking-system/pkg/render"
 	"github.com/alexedwards/scs/v2"
 )
 

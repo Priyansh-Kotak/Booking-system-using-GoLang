@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/config"
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/models"
+	"github.com/Priyansh-Kotak/booking-system/pkg/config"
+	"github.com/Priyansh-Kotak/booking-system/pkg/models"
 )
 
 var app *config.AppConfig

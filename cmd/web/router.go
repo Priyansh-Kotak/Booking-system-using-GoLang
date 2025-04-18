@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/config"
-	"github.com/Priyansh-Kotak/udemy-course-project/pkg/handlers"
+	"github.com/Priyansh-Kotak/booking-system/pkg/config"
+	"github.com/Priyansh-Kotak/booking-system/pkg/handlers"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 )
@@ -21,6 +21,9 @@ func routes(app *config.AppConfig) http.Handler {
 
 	mux.Get("/", handlers.Repo.Home)
 	mux.Get("/about", handlers.Repo.About)
+
+	fileServer := http.FileServer(http.Dir("./static/"))
+	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
 	return mux
 }
